@@ -5,3 +5,4 @@ compatibility_date = "2025-11-02"
 [[d1_databases]]
 binding = "echoverse_db"
 database_name = "echoverse-db"
+database_id = "3e7a9c06-60ef-4cac-987f-3a7c24f3ab2f"
