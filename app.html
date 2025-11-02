@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EchoVerse — Demo</title>
+  <link rel="stylesheet" href="/style.css">
+  <meta name="robots" content="noindex">
+</head>
+<body>
+  <main class="container">
+    <h1>EchoVerse — Demo</h1>
+
+    <section class="composer">
+      <label for="story">Write an anonymous story</label>
+      <textarea id="story" rows="6" placeholder="Write something... (anonymous)"></textarea>
+      <div class="row">
+        <button id="submit">Submit</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </section>
+
+    <section class="stories">
+      <h2>Stories</h2>
+      <div id="list">Loading…</div>
+    </section>
+  </main>
+
+  <script>
+    // Submit a story to /submit (Pages Function)
+    async function submitStory() {
+      const content = document.getElementById('story').value.trim();
+      const statusEl = document.getElementById('status');
+      if (!content) { statusEl.textContent = 'Write something first.'; return; }
+      statusEl.textContent = 'Sending…';
+      try {
+        const res = await fetch('/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content })
+        });
+        const j = await res.json();
+        if (res.ok && j.success) {
+          statusEl.textContent = 'Sent ✅';
+          document.getElementById('story').value = '';
+          await loadStories();
+        } else {
+          statusEl.textContent = 'Error: ' + (j.error || 'unknown');
+        }
+      } catch (err) {
+        statusEl.textContent = 'Network error';
+      }
+    }
+
+    // Load stories from /fetch
+    async function loadStories() {
+      const list = document.getElementById('list');
+      list.textContent = 'Loading…';
+      try {
+        const res = await fetch('/fetch');
+        const j = await res.json();
+        if (!Array.isArray(j)) {
+          list.textContent = 'No stories or error: ' + JSON.stringify(j);
+          return;
+        }
+        if (j.length === 0) { list.textContent = 'No stories yet.'; return; }
+        list.innerHTML = j.map(s => `
+          <article class="story">
+            <div class="meta">${new Date(s.created_at).toLocaleString()}</div>
+            <div class="content">${escapeHtml(s.content)}</div>
+          </article>
+        `).join('');
+      } catch (err) {
+        list.textContent = 'Fetch error';
+      }
+    }
+
+    function escapeHtml(unsafe) {
+      return (unsafe + '').replace(/[&<>"']/g, function (m) {
+        return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m];
+      });
+    }
+
+    document.getElementById('submit').addEventListener('click', submitStory);
+    // Load stories on page load
+    loadStories();
+  </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+name = "echoverse"
+compatibility_date = "2025-11-02"
+
+# Bind the D1 database named "echoverse-db" to the env var DB
+[[d1_databases]]
+binding = "echoverse_db"
+database_name = "echoverse-db"
