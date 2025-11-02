@@ -16,7 +16,7 @@ export async function onRequest(context) {
     }
 
     // Insert into D1. If the table doesn't exist yet, this will error until you apply schema.sql.
-    const stmt = env.DB.prepare('INSERT INTO stories (content) VALUES (?)');
+    const stmt = env.echoverse_db.prepare('INSERT INTO stories (content) VALUES (?)');
     const result = await stmt.bind(content).run();
 
     // lastInsertRowid is returned by D1 results when insertion is successful
