@@ -1,0 +1,4 @@
+const SUPABASE_URL = 'https://tidzvxmdupjofqlfhmto.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpZHp2eG1kdXBqb2ZxbGZobXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NTM3MDEsImV4cCI6MjA3ODAyOTcwMX0.ysBMX8w7sxMQ2pWcyYOVZB8k1PZ9zfwZzXtxxfEDE6I';
+
+export { SUPABASE_URL, SUPABASE_KEY };

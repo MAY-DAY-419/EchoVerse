@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoVerse - Anonymous Storytelling Universe</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <h1 class="logo">EchoVerse</h1>
+                <p class="tagline">Where emotions find their voice</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="container">
+                <!-- Hero Section -->
+                <section class="hero">
+                    <h2 class="hero-title">Share your story anonymously</h2>
+                    <p class="hero-subtitle">Release your emotions, experiences, and secrets as Echoes that travel through our supportive universe</p>
+                    <button class="cta-button" id="createEchoBtn">
+                        <span class="cta-icon">✨</span>
+                        Let your Echo be heard
+                    </button>
+                </section>
+
+                <!-- Echo Creation Modal -->
+                <div class="modal" id="echoModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Share Your Echo</h3>
+                            <button class="close-btn" id="closeModal">&times;</button>
+                        </div>
+                        
+                        <form class="echo-form" id="echoForm">
+                            <!-- Content Input -->
+                            <div class="form-group">
+                                <textarea 
+                                    id="echoContent" 
+                                    placeholder="Write your echo... Share what's in your heart"
+                                    maxlength="2000"
+                                    required
+                                ></textarea>
+                                <div class="char-count">
+                                    <span id="charCount">0</span>/2000
+                                </div>
+                            </div>
+
+                            <!-- Emotion Tag Selection -->
+                            <div class="form-group">
+                                <label class="form-label">Choose your emotion</label>
+                                <div class="emotion-tags">
+                                    <button type="button" class="emotion-tag" data-emotion="Love">
+                                        <span class="emotion-icon">💕</span>
+                                        <span class="emotion-name">Love</span>
+                                    </button>
+                                    <button type="button" class="emotion-tag" data-emotion="Guilt">
+                                        <span class="emotion-icon">😔</span>
+                                        <span class="emotion-name">Guilt</span>
+                                    </button>
+                                    <button type="button" class="emotion-tag" data-emotion="Regret">
+                                        <span class="emotion-icon">😞</span>
+                                        <span class="emotion-name">Regret</span>
+                                    </button>
+                                    <button type="button" class="emotion-tag" data-emotion="Hope">
+                                        <span class="emotion-icon">🌟</span>
+                                        <span class="emotion-name">Hope</span>
+                                    </button>
+                                    <button type="button" class="emotion-tag" data-emotion="Pain">
+                                        <span class="emotion-icon">💔</span>
+                                        <span class="emotion-name">Pain</span>
+                                    </button>
+                                    <button type="button" class="emotion-tag" data-emotion="Joy">
+                                        <span class="emotion-icon">😊</span>
+                                        <span class="emotion-name">Joy</span>
+                                    </button>
+                                    <button type="button" class="emotion-tag" data-emotion="Fear">
+                                        <span class="emotion-icon">😰</span>
+                                        <span class="emotion-name">Fear</span>
+                                    </button>
+                                    <button type="button" class="emotion-tag" data-emotion="Confession">
+                                        <span class="emotion-icon">🤐</span>
+                                        <span class="emotion-name">Confession</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Mood Color Selection -->
+                            <div class="form-group">
+                                <label class="form-label">Choose a mood color (optional)</label>
+                                <div class="mood-colors">
+                                    <button type="button" class="mood-color" data-color="#FF6B6B" style="background: #FF6B6B" title="Passionate Red"></button>
+                                    <button type="button" class="mood-color" data-color="#4ECDC4" style="background: #4ECDC4" title="Calm Teal"></button>
+                                    <button type="button" class="mood-color" data-color="#45B7D1" style="background: #45B7D1" title="Peaceful Blue"></button>
+                                    <button type="button" class="mood-color" data-color="#96CEB4" style="background: #96CEB4" title="Healing Green"></button>
+                                    <button type="button" class="mood-color" data-color="#FFEAA7" style="background: #FFEAA7" title="Warm Yellow"></button>
+                                    <button type="button" class="mood-color" data-color="#DDA0DD" style="background: #DDA0DD" title="Gentle Purple"></button>
+                                    <button type="button" class="mood-color" data-color="#F8C471" style="background: #F8C471" title="Soft Orange"></button>
+                                    <button type="button" class="mood-color" data-color="#85929E" style="background: #85929E" title="Neutral Gray"></button>
+                                </div>
+                            </div>
+
+                            <!-- Identity Options -->
+                            <div class="form-group">
+                                <div class="identity-options">
+                                    <label class="identity-option">
+                                        <input type="radio" name="identityType" value="anonymous" checked>
+                                        <span class="identity-label">
+                                            <span class="identity-icon">👤</span>
+                                            Post anonymously
+                                        </span>
+                                    </label>
+                                    <label class="identity-option">
+                                        <input type="radio" name="identityType" value="symbolic">
+                                        <span class="identity-label">
+                                            <span class="identity-icon">✨</span>
+                                            Use symbolic identity
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="symbolic-identity-section" id="symbolicIdentitySection" style="display: none;">
+                                    <button type="button" class="generate-identity-btn" id="generateIdentityBtn">
+                                        Generate Identity
+                                    </button>
+                                    <div class="current-identity" id="currentIdentity" style="display: none;">
+                                        <span class="identity-display" id="identityDisplay"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="form-actions">
+                                <button type="submit" class="submit-btn" id="submitEcho">
+                                    <span class="submit-icon">🌊</span>
+                                    Release Echo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Echo Stream -->
+                <section class="echo-stream">
+                    <div class="stream-header">
+                        <h2>Echo Stream</h2>
+                        <p>Voices from the universe</p>
+                    </div>
+                    <div class="echoes-container" id="echoesContainer">
+                        <div class="loading" id="loadingIndicator">
+                            <div class="loading-spinner"></div>
+                            <p>Loading echoes...</p>
+                        </div>
+                    </div>
+                    <div class="load-more-container">
+                        <button class="load-more-btn" id="loadMoreBtn" style="display: none;">
+                            Load More Echoes
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2024 EchoVerse. A space for anonymous emotional expression.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div class="toast" id="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
