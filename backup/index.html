@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#c7a0f1" />
+    <title>EchoVerse (backup conflicted)</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+
+    <main>
+        <section class="landing-hero">
+            <h1 class="brand-title">EchoVerse</h1>
+            <p class="tagline">People judge. We don't.<br />Let your Echo travel through the Verse.</p>
+            <button class="cta-button" id="loginBtn">Login</button>
+        </section>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+            <h2 id="loginTitle">Login to EchoVerse</h2>
+            <input type="text" id="username" placeholder="Username" autocomplete="username" />
+            <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+            <button class="cta-button" id="submitLogin">Enter</button>
+            <p id="errorMsg" style="color:#ff6b6b; display:none; margin-top:10px;"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- Conflicted original backup (contains both HEAD and incoming sections) ---
+        // This file is saved as a backup before resolving the merge conflict.
+    </script>
+</body>
+</html>
