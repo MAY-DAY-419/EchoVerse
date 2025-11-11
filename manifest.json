@@ -2,21 +2,40 @@
   "name": "EchoVerse",
   "short_name": "EchoVerse",
   "description": "People judge. We don't.",
-  "start_url": "/",
+  "id": "/",
+  "scope": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
-  "background_color": "#f8f1ff",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "background_color": "#0c0c13",
   "theme_color": "#c7a0f1",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "/assets/sample.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "https://via.placeholder.com/192.png?text=EchoVerse",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512.png?text=EchoVerse",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Open Echoes",
+      "short_name": "Echoes",
+      "url": "/echo.html"
+    }
+  ],
+  "prefer_related_applications": false
 }

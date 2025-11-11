@@ -4,11 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="EchoVerse" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="#c7a0f1" />
     <title>EchoVerse</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="/assets/sample.svg" type="image/svg+xml" />
+    <!-- iOS home screen icon (replace with PNG when available) -->
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/180.png?text=EV" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
@@ -18,7 +23,10 @@
         <section class="landing-hero">
             <h1 class="brand-title">EchoVerse</h1>
             <p class="tagline">People judge. We don't.<br />Let your Echo travel through the Verse.</p>
-            <button class="cta-button" id="loginBtn">Login</button>
+                        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                            <button class="cta-button" id="loginBtn">Login</button>
+                            <button class="cta-button" id="installBtn" style="display:none;">Install App</button>
+                        </div>
         </section>
     </main>
 
@@ -34,7 +42,7 @@
     </div>
 
     <script>
-        // Theme setup
+    // Theme setup
         const html = document.documentElement;
         const themeToggle = document.getElementById('themeToggle');
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -88,7 +96,32 @@
             if (e.key === 'Enter') submitLogin.click();
         });
 
-        // Register service worker (optional for A2HS)
+        // PWA install prompt
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'inline-block';
+        });
+        installBtn?.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        });
+
+        // iOS tip (no beforeinstallprompt)
+        const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        const isInStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        if (isIOS && !isInStandalone) {
+            installBtn.style.display = 'inline-block';
+            installBtn.textContent = 'Add to Home Screen';
+            installBtn.onclick = () => alert('On iOS: Tap Share, then "Add to Home Screen"');
+        }
+
+        // Register service worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => {});
         }
