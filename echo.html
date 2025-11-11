@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#c7a0f1">
+    <title>EchoVerse - Your Echoes</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        🌙
+    </button>
+    
+    <button class="logout-btn" id="logoutBtn">Logout</button>
+
+    <div class="container" style="margin-top: 80px;">
+        <h1 class="page-title">EchoVerse</h1>
+        
+        <div class="composer">
+            <textarea placeholder="Share your echo..." id="echoText" rows="4"></textarea>
+            <div class="row">
+                <button class="button primary" id="submitEcho">Post Echo</button>
+            </div>
+        </div>
+
+        <div class="stories" id="echoStream">
+            <p style="text-align: center; color: var(--current-muted);">Loading echoes...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Check auth
+        if (localStorage.getItem('echoverse_auth') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+            themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('echoverse_auth');
+            window.location.href = 'index.html';
+        });
+
+        // Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Submit Echo
+        const submitEcho = document.getElementById('submitEcho');
+        const echoText = document.getElementById('echoText');
+
+        submitEcho.addEventListener('click', async () => {
+            const content = echoText.value.trim();
+            if (!content) return;
+
+            submitEcho.disabled = true;
+            submitEcho.textContent = 'Posting...';
+
+            try {
+                const { error } = await supabaseClient
+                    .from('echoes')
+                    .insert([{ content, created_at: new Date() }]);
+
+                if (error) throw error;
+
+                echoText.value = '';
+                await loadEchoes();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to post echo');
+            } finally {
+                submitEcho.disabled = false;
+                submitEcho.textContent = 'Post Echo';
+            }
+        });
+
+        // Load Echoes
+        async function loadEchoes() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('echoes')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const echoStream = document.getElementById('echoStream');
+                
+                if (!data || data.length === 0) {
+                    echoStream.innerHTML = '<p style="text-align: center; color: var(--current-muted);">No echoes yet. Be the first!</p>';
+                    return;
+                }
+
+                echoStream.innerHTML = '';
+
+                data.forEach(echo => {
+                    const date = new Date(echo.created_at);
+                    const timeAgo = formatTime(date);
+                    const card = document.createElement('div');
+                    card.className = 'story fade-in';
+                    card.innerHTML = `
+                        <div class="meta">${timeAgo}</div>
+                        <div class="content">${escapeHtml(echo.content)}</div>
+                    `;
+                    echoStream.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('echoStream').innerHTML = '<p style="text-align: center; color: #ff6b6b;">Failed to load echoes</p>';
+            }
+        }
+
+        function formatTime(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hrs ago';
+            if (seconds < 2592000) return Math.floor(seconds / 86400) + ' days ago';
+            return date.toLocaleDateString();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load on start
+        loadEchoes();
+
+        // Auto refresh every 30 seconds
+        setInterval(loadEchoes, 30000);
+    </script>
+</body>
+</html>

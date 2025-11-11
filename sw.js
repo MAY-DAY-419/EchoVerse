@@ -1,48 +1,18 @@
-const CACHE_NAME = 'echoverse-v1';
-const urlsToCache = [
+const CACHE = 'echoverse-v1';
+const ASSETS = [
   '/',
   '/index.html',
   '/style.css',
-  '/config.js',
   '/manifest.json'
 ];
-
-// Install event - cache resources
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache);
-      })
-  );
+self.addEventListener('install', (e) => {
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
-
-// Fetch event - serve from cache, fallback to network
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
-  );
+self.addEventListener('activate', (e) => {
+  e.waitUntil(self.clients.claim());
 });
-
-// Activate event - clean up old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then((res) => res || fetch(e.request))
   );
 });

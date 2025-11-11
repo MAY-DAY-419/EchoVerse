@@ -31,6 +31,7 @@
     --current-accent: var(--accent-dark);
     --current-muted: var(--muted-dark);
     --current-text: var(--text-dark);
+    --current-accent-solid: var(--accent-solid-dark);
 }
 
 html,body{
@@ -40,87 +41,6 @@ html,body{
     color:var(--current-text);
     background:var(--current-bg);
     transition: background-color 0.3s, color 0.3s;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Login Styles */
-.login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    background: 
-        radial-gradient(circle at 20% 20%, rgba(224, 195, 252, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(142, 197, 252, 0.15) 0%, transparent 40%);
-}
-
-.login-box {
-    background: var(--current-glass);
-    padding: 3rem 2rem;
-    border-radius: 24px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
-    backdrop-filter: blur(12px);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-}
-
-.login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-top: 2rem;
-}
-
-.login-form input {
-    padding: 1rem;
-    border: 2px solid var(--accent-solid, #c7a0f1);
-    border-radius: 12px;
-    background: var(--current-bg);
-    color: var(--current-text);
-    font-size: 1rem;
-    transition: all 0.3s;
-    font-family: inherit;
-}
-
-.login-form input:focus {
-    outline: none;
-    border-color: var(--accent-solid, #c7a0f1);
-    box-shadow: 0 0 0 3px rgba(199, 160, 241, 0.1);
-}
-
-.error-message {
-    color: #ff6b6b;
-    font-size: 0.9rem;
-    margin: 0;
-    display: none;
-}
-
-.logout-button {
-    position: fixed;
-    top: 70px;
-    right: 20px;
-    padding: 0.5rem 1rem;
-    background: var(--current-glass);
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 600;
-    color: var(--current-text);
-    z-index: 999;
-    transition: all 0.3s;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.logout-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-}
-
-.logout-button:active {
-    transform: translateY(0);
 }
 .landing-hero {
     min-height: 100vh;
@@ -189,8 +109,26 @@ html,body{
     0%, 100% { transform: translateX(-50%) translateY(0); }
     50% { transform: translateX(-50%) translateY(-10px); }
 }
-.composer{background:rgba(255,255,255,0.7);padding:16px;border-radius:10px;margin-bottom:20px;box-shadow:0 4px 18px rgba(0,0,0,0.03)}
-textarea{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(16,42,67,0.08);resize:vertical;font-size:15px}
+.composer{
+    background: var(--current-glass);
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.03);
+    backdrop-filter: blur(10px);
+}
+
+textarea{
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--current-muted);
+    background: var(--current-bg);
+    color: var(--current-text);
+    resize: vertical;
+    font-size: 15px;
+    font-family: inherit;
+}
 .row{display:flex;align-items:center;gap:12px;margin-top:8px}
 .cta-button {
     background: var(--accent);
@@ -260,20 +198,7 @@ button {
     white-space: pre-wrap;
     font-size: 16px;
     line-height: 1.6;
-    margin-bottom: 0;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-.story .row {
-    display: none; /* Remove whisper buttons */
-}
-
-.loading-message, .no-echoes {
-    text-align: center;
-    padding: 2rem;
-    color: var(--current-muted);
-    font-size: 1.1rem;
+    margin-bottom: 16px;
 }
 
 .theme-toggle {
@@ -334,107 +259,106 @@ button {
     animation: fadeIn 0.5s ease-out forwards;
 }
 
-/* Mobile & Responsive Design */
-@media (max-width: 768px) {
-    .brand-title {
-        font-size: clamp(2.5rem, 12vw, 5rem);
+/* small screens */
+@media (max-width: 600px) {
+    .center-block {
+        margin: 20px 12px;
+        padding: 20px;
     }
 
-    .tagline {
-        font-size: 1rem;
-        padding: 0 1rem;
+    .button-group {
+        flex-direction: column;
     }
 
-    .cta-button {
-        font-size: 1rem;
-        padding: 1rem 2rem;
+    .hero h1 {
+        font-size: 2rem;
     }
 
-    .landing-hero {
-        padding: 1rem;
-    }
-
-    .container {
-        padding: 1rem;
-    }
-
-    .composer {
-        padding: 1rem;
-        margin: 1rem;
+    .hero-text {
+        font-size: 1.2rem;
     }
 
     .composer textarea {
         font-size: 16px; /* Prevents zoom on iOS */
     }
-
-    .stories .story {
-        padding: 1rem;
-        margin: 0.75rem 0;
-    }
-
-    .theme-toggle {
-        top: 10px;
-        right: 10px;
-        width: 36px;
-        height: 36px;
-        font-size: 18px;
-    }
-
-    .logout-button {
-        top: 55px;
-        right: 10px;
-        font-size: 0.85rem;
-        padding: 0.4rem 0.8rem;
-    }
-
-    .login-box {
-        padding: 2rem 1.5rem;
-    }
-
-    .scroll-prompt {
-        font-size: 2rem;
-    }
 }
 
-/* Extra small screens */
-@media (max-width: 400px) {
-    .brand-title {
-        font-size: 2rem;
-    }
-
-    .login-box {
-        padding: 1.5rem 1rem;
-    }
-
-    .cta-button {
-        padding: 0.9rem 1.5rem;
-        font-size: 0.95rem;
-    }
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
 }
 
-/* Landscape mobile */
-@media (max-height: 600px) and (orientation: landscape) {
-    .landing-hero {
-        min-height: auto;
-        padding: 2rem 1rem;
-    }
-
-    .scroll-prompt {
-        display: none;
-    }
+.modal-content {
+    background: var(--current-glass);
+    backdrop-filter: blur(20px);
+    padding: 2.5rem;
+    border-radius: 20px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
-/* Touch device improvements */
-@media (hover: none) and (pointer: coarse) {
-    .cta-button, .button, .theme-toggle, .logout-button {
-        -webkit-tap-highlight-color: transparent;
-    }
+.modal-content h2 {
+    color: var(--current-text);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
 
-    .stories .story:hover {
-        transform: none;
-    }
+.modal-content input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid var(--current-muted);
+    border-radius: 8px;
+    background: var(--current-bg);
+    color: var(--current-text);
+    font-size: 16px;
+    font-family: inherit;
+}
 
-    button:active {
-        transform: scale(0.98);
-    }
+.modal-content input:focus {
+    outline: none;
+    border-color: var(--accent-solid);
+}
+
+/* Logout Button */
+.logout-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    background: var(--current-glass);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--current-text);
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.logout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+/* Page Title */
+.page-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    background: var(--accent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }

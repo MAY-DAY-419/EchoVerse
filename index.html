@@ -1,400 +1,96 @@
-<!DOCTYPE html><!DOCTYPE html>
-
-<html lang="en" data-theme="light"><html lang="en" data-theme="light">
-
-<head><head>
-
-    <meta charset="UTF-8">    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <meta name="apple-mobile-web-app-capable" content="yes">    <title>EchoVerse - Share Your Story</title>
-
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">    <link rel="stylesheet" href="style.css">
-
-    <meta name="mobile-web-app-capable" content="yes">    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <meta name="theme-color" content="#c7a0f1">    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-    <title>EchoVerse - Share Your Story</title></head>
-
-    <link rel="stylesheet" href="style.css"><body>
-
-    <link rel="manifest" href="manifest.json">    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-
-    <link rel="apple-touch-icon" href="icon.png">        🌙
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">    </button>
-
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-</head>    <main>
-
-<body>        <section class="landing-hero">
-
-    <!-- Login Screen -->            <h1 class="brand-title">EchoVerse</h1>
-
-    <div class="login-container" id="loginContainer">            <p class="tagline">People judge. We don’t. <br> Let your Echo travel through the Verse.</p>
-
-        <div class="login-box">            <button class="cta-button" id="postEchoBtn">Share Your Story</button>
-
-            <h1 class="brand-title">EchoVerse</h1>            <div class="scroll-prompt" id="scrollPrompt">↓</div>
-
-            <p class="tagline">People judge. We don't.</p>        </section>
-
-            <form class="login-form" id="loginForm">
-
-                <input type="text" id="username" placeholder="Username" required autocomplete="username">        <div class="container">
-
-                <input type="password" id="password" placeholder="Password" required autocomplete="current-password">            <div class="composer" id="echoInput" style="display: none;">
-
-                <button type="submit" class="cta-button">Login</button>                <textarea placeholder="Write your echo..." id="echoText"></textarea>
-
-                <p class="error-message" id="errorMessage"></p>                <div class="row">
-
-            </form>                    <button class="button primary" id="submitEcho">Let your Echo be heard</button>
-
-        </div>                </div>
-
-    </div>            </div>
-
-
-
-    <!-- Main App (hidden until logged in) -->            <div class="stories" id="echoStream">
-
-    <div class="app-container" id="appContainer" style="display: none;">                <!-- Echo cards will be dynamically inserted here -->
-
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">            </div>
-
-            🌙        </div>
-
-        </button>    </main>
-
-        
-
-        <button class="logout-button" id="logoutBtn">Logout</button>    <script type="module">
-
-        import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
-
-        <main>
-
-            <section class="landing-hero">        // Theme Toggle
-
-                <h1 class="brand-title">EchoVerse</h1>        const themeToggle = document.getElementById('themeToggle');
-
-                <p class="tagline">People judge. We don't. <br> Let your Echo travel through the Verse.</p>        const html = document.documentElement;
-
-                <button class="cta-button" id="postEchoBtn">Share Your Story</button>        
-
-                <div class="scroll-prompt" id="scrollPrompt">↓</div>        themeToggle.addEventListener('click', () => {
-
-            </section>            const currentTheme = html.getAttribute('data-theme');
-
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
-            <div class="container">            html.setAttribute('data-theme', newTheme);
-
-                <div class="composer" id="echoInput" style="display: none;">            themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
-
-                    <textarea placeholder="Write your echo..." id="echoText" rows="4"></textarea>        });
-
-                    <div class="row">
-
-                        <button class="button primary" id="submitEcho">Let your Echo be heard</button>        // Show/Hide Echo Input and Smooth Scroll
-
-                    </div>        const postEchoBtn = document.getElementById('postEchoBtn');
-
-                </div>        const scrollPrompt = document.getElementById('scrollPrompt');
-
-        const echoInput = document.getElementById('echoInput');
-
-                <div class="stories" id="echoStream">        
-
-                    <div class="loading-message">Loading echoes...</div>        function scrollToContent() {
-
-                </div>            echoInput.style.display = 'block';
-
-            </div>            echoInput.scrollIntoView({ behavior: 'smooth' });
-
-        </main>        }
-
-    </div>        
-
-        postEchoBtn.addEventListener('click', scrollToContent);
-
-    <script type="module">        scrollPrompt.addEventListener('click', scrollToContent);
-
-        import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
-
-        // Initialize Supabase
-
-        // Hardcoded credentials        const { createClient } = supabase;
-
-        const VALID_USERNAME = 'UNSHREKABLE';        const supabaseClient = createClient(
-
-        const VALID_PASSWORD = 'MAYDAYPASS';            SUPABASE_URL,
-
-            SUPABASE_KEY
-
-        // Check if user is already logged in        );
-
-        const isLoggedIn = localStorage.getItem('echoverse_logged_in') === 'true';
-
-                // Submit Echo
-
-        if (isLoggedIn) {        const submitEcho = document.getElementById('submitEcho');
-
-            showApp();        const echoText = document.getElementById('echoText');
-
-        }
-
-        submitEcho.addEventListener('click', async () => {
-
-        // Login Form Handler            const content = echoText.value.trim();
-
-        document.getElementById('loginForm').addEventListener('submit', (e) => {            if (!content) return;
-
-            e.preventDefault();
-
-            const username = document.getElementById('username').value;            try {
-
-            const password = document.getElementById('password').value;                const { data, error } = await supabaseClient
-
-            const errorMessage = document.getElementById('errorMessage');                    .from('echoes')
-
-                    .insert([{ content, created_at: new Date() }]);
-
-            if (username === VALID_USERNAME && password === VALID_PASSWORD) {
-
-                localStorage.setItem('echoverse_logged_in', 'true');                if (error) throw error;
-
-                showApp();
-
-            } else {                echoText.value = '';
-
-                errorMessage.textContent = 'Invalid username or password';                loadEchoes();
-
-                errorMessage.style.display = 'block';            } catch (error) {
-
-            }                console.error('Error posting echo:', error);
-
-        });            }
-
-        });
-
-        // Logout Handler
-
-        document.getElementById('logoutBtn').addEventListener('click', () => {        // Load Echoes
-
-            localStorage.removeItem('echoverse_logged_in');        async function loadEchoes() {
-
-            location.reload();            try {
-
-        });                const { data, error } = await supabaseClient
-
-                    .from('echoes')
-
-        function showApp() {                    .select('*')
-
-            document.getElementById('loginContainer').style.display = 'none';                    .order('created_at', { ascending: false })
-
-            document.getElementById('appContainer').style.display = 'block';                    .limit(10);
-
-            loadEchoes();
-
-        }                if (error) throw error;
-
-
-
-        // Theme Toggle                const echoStream = document.getElementById('echoStream');
-
-        const themeToggle = document.getElementById('themeToggle');                echoStream.innerHTML = '';
-
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#c7a0f1" />
+    <title>EchoVerse</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+
+    <main>
+        <section class="landing-hero">
+            <h1 class="brand-title">EchoVerse</h1>
+            <p class="tagline">People judge. We don't.<br />Let your Echo travel through the Verse.</p>
+            <button class="cta-button" id="loginBtn">Login</button>
+        </section>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+            <h2 id="loginTitle">Login to EchoVerse</h2>
+            <input type="text" id="username" placeholder="Username" autocomplete="username" />
+            <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+            <button class="cta-button" id="submitLogin">Enter</button>
+            <p id="errorMsg" style="color:#ff6b6b; display:none; margin-top:10px;"></p>
+        </div>
+    </div>
+
+    <script>
+        // Theme setup
         const html = document.documentElement;
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        themeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';
+        themeToggle.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', next);
+            themeToggle.textContent = next === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('theme', next);
+        });
 
-                        data.forEach(echo => {
+        // Modal + login
+        const loginBtn = document.getElementById('loginBtn');
+        const loginModal = document.getElementById('loginModal');
+        const submitLogin = document.getElementById('submitLogin');
+        const USER = 'UNSHREKABLE';
+        const PASS = 'MAYDAYPASS';
 
-        const savedTheme = localStorage.getItem('theme') || 'light';                    const timeAgo = new Date(echo.created_at).toLocaleDateString();
+        loginBtn.addEventListener('click', () => {
+            loginModal.style.display = 'flex';
+            loginModal.setAttribute('aria-hidden', 'false');
+            document.getElementById('username').focus();
+        });
 
-        html.setAttribute('data-theme', savedTheme);                    const card = document.createElement('div');
-
-        themeToggle.textContent = savedTheme === 'light' ? '🌙' : '☀️';                    card.className = 'story fade-in';
-
-                            card.innerHTML = `
-
-        themeToggle.addEventListener('click', () => {                        <div class="meta">${timeAgo}</div>
-
-            const currentTheme = html.getAttribute('data-theme');                        <div class="content">${echo.content}</div>
-
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';                        <div class="row">
-
-            html.setAttribute('data-theme', newTheme);                            <button class="button" onclick="showWhisperBox(${echo.id})">
-
-            themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';                                Whisper back
-
-            localStorage.setItem('theme', newTheme);                            </button>
-
-        });                        </div>
-
-                    `;
-
-        // Show/Hide Echo Input and Smooth Scroll                    echoStream.appendChild(card);
-
-        const postEchoBtn = document.getElementById('postEchoBtn');                });
-
-        const scrollPrompt = document.getElementById('scrollPrompt');            } catch (error) {
-
-        const echoInput = document.getElementById('echoInput');                console.error('Error loading echoes:', error);
-
-                    }
-
-        function scrollToContent() {        }
-
-            echoInput.style.display = 'block';
-
-            echoInput.scrollIntoView({ behavior: 'smooth' });        // Listen Button
-
-            document.getElementById('echoText').focus();        const listenBtn = document.getElementById('listenBtn');
-
-        }        listenBtn.addEventListener('click', () => {
-
-                    loadEchoes();
-
-        postEchoBtn.addEventListener('click', scrollToContent);            document.querySelector('.stories').scrollIntoView({ behavior: 'smooth' });
-
-        scrollPrompt.addEventListener('click', scrollToContent);        });
-
-
-
-        // Initialize Supabase        // Initialize page
-
-        const { createClient } = supabase;        loadEchoes();
-
-        const supabaseClient = createClient(    </script>
-
-            SUPABASE_URL,</body>
-
-            SUPABASE_KEY</html>
-
-        );
-
-        // Submit Echo
-        const submitEcho = document.getElementById('submitEcho');
-        const echoText = document.getElementById('echoText');
-
-        submitEcho.addEventListener('click', async () => {
-            const content = echoText.value.trim();
-            if (!content) return;
-
-            submitEcho.disabled = true;
-            submitEcho.textContent = 'Sending...';
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('echoes')
-                    .insert([{ content, created_at: new Date() }]);
-
-                if (error) throw error;
-
-                echoText.value = '';
-                await loadEchoes();
-                echoInput.style.display = 'none';
-                
-                // Scroll to show the new echo
-                setTimeout(() => {
-                    document.querySelector('.stories').scrollIntoView({ behavior: 'smooth' });
-                }, 300);
-            } catch (error) {
-                console.error('Error posting echo:', error);
-                alert('Failed to post echo. Please try again.');
-            } finally {
-                submitEcho.disabled = false;
-                submitEcho.textContent = 'Let your Echo be heard';
+        // Close modal by clicking outside
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+                loginModal.setAttribute('aria-hidden', 'true');
             }
         });
 
-        // Load Echoes
-        async function loadEchoes() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('echoes')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                const echoStream = document.getElementById('echoStream');
-                
-                if (data.length === 0) {
-                    echoStream.innerHTML = '<div class="no-echoes">No echoes yet. Be the first to share!</div>';
-                    return;
-                }
-
-                echoStream.innerHTML = '';
-
-                data.forEach(echo => {
-                    const date = new Date(echo.created_at);
-                    const timeAgo = formatTimeAgo(date);
-                    const card = document.createElement('div');
-                    card.className = 'story fade-in';
-                    card.innerHTML = `
-                        <div class="meta">${timeAgo}</div>
-                        <div class="content">${escapeHtml(echo.content)}</div>
-                    `;
-                    echoStream.appendChild(card);
-                });
-            } catch (error) {
-                console.error('Error loading echoes:', error);
-                document.getElementById('echoStream').innerHTML = '<div class="error-message">Failed to load echoes. Please refresh.</div>';
+        // Submit login
+        submitLogin.addEventListener('click', () => {
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            if (u === USER && p === PASS) {
+                localStorage.setItem('echoverse_auth', 'true');
+                window.location.href = 'echo.html';
+            } else {
+                errorMsg.textContent = 'Invalid credentials';
+                errorMsg.style.display = 'block';
             }
-        }
+        });
 
-        // Helper function to format time ago
-        function formatTimeAgo(date) {
-            const seconds = Math.floor((new Date() - date) / 1000);
-            
-            let interval = seconds / 31536000;
-            if (interval > 1) return Math.floor(interval) + " years ago";
-            
-            interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + " months ago";
-            
-            interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + " days ago";
-            
-            interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + " hours ago";
-            
-            interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + " minutes ago";
-            
-            return "Just now";
-        }
+        // Enter key submits
+        document.getElementById('password').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitLogin.click();
+        });
 
-        // Helper function to escape HTML
-        function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
-            };
-            return text.replace(/[&<>"']/g, m => map[m]);
-        }
-
-        // Auto-reload echoes every 30 seconds
-        if (isLoggedIn) {
-            setInterval(loadEchoes, 30000);
-        }
-
-        // Register Service Worker for PWA
+        // Register service worker (optional for A2HS)
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Service Worker registered'))
-                    .catch(err => console.log('Service Worker registration failed'));
-            });
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
         }
     </script>
 </body>
