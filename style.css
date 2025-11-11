@@ -40,6 +40,87 @@ html,body{
     color:var(--current-text);
     background:var(--current-bg);
     transition: background-color 0.3s, color 0.3s;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Login Styles */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(224, 195, 252, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(142, 197, 252, 0.15) 0%, transparent 40%);
+}
+
+.login-box {
+    background: var(--current-glass);
+    padding: 3rem 2rem;
+    border-radius: 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    backdrop-filter: blur(12px);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.login-form input {
+    padding: 1rem;
+    border: 2px solid var(--accent-solid, #c7a0f1);
+    border-radius: 12px;
+    background: var(--current-bg);
+    color: var(--current-text);
+    font-size: 1rem;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: var(--accent-solid, #c7a0f1);
+    box-shadow: 0 0 0 3px rgba(199, 160, 241, 0.1);
+}
+
+.error-message {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    margin: 0;
+    display: none;
+}
+
+.logout-button {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    padding: 0.5rem 1rem;
+    background: var(--current-glass);
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--current-text);
+    z-index: 999;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.logout-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.logout-button:active {
+    transform: translateY(0);
 }
 .landing-hero {
     min-height: 100vh;
@@ -179,7 +260,20 @@ button {
     white-space: pre-wrap;
     font-size: 16px;
     line-height: 1.6;
-    margin-bottom: 16px;
+    margin-bottom: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.story .row {
+    display: none; /* Remove whisper buttons */
+}
+
+.loading-message, .no-echoes {
+    text-align: center;
+    padding: 2rem;
+    color: var(--current-muted);
+    font-size: 1.1rem;
 }
 
 .theme-toggle {
@@ -240,22 +334,107 @@ button {
     animation: fadeIn 0.5s ease-out forwards;
 }
 
-/* small screens */
-@media (max-width: 600px) {
-    .center-block {
-        margin: 20px 12px;
-        padding: 20px;
+/* Mobile & Responsive Design */
+@media (max-width: 768px) {
+    .brand-title {
+        font-size: clamp(2.5rem, 12vw, 5rem);
     }
 
-    .button-group {
-        flex-direction: column;
+    .tagline {
+        font-size: 1rem;
+        padding: 0 1rem;
     }
 
-    .hero h1 {
+    .cta-button {
+        font-size: 1rem;
+        padding: 1rem 2rem;
+    }
+
+    .landing-hero {
+        padding: 1rem;
+    }
+
+    .container {
+        padding: 1rem;
+    }
+
+    .composer {
+        padding: 1rem;
+        margin: 1rem;
+    }
+
+    .composer textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    .stories .story {
+        padding: 1rem;
+        margin: 0.75rem 0;
+    }
+
+    .theme-toggle {
+        top: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+
+    .logout-button {
+        top: 55px;
+        right: 10px;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .login-box {
+        padding: 2rem 1.5rem;
+    }
+
+    .scroll-prompt {
+        font-size: 2rem;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 400px) {
+    .brand-title {
         font-size: 2rem;
     }
 
-    .hero-text {
-        font-size: 1.2rem;
+    .login-box {
+        padding: 1.5rem 1rem;
+    }
+
+    .cta-button {
+        padding: 0.9rem 1.5rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* Landscape mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+    .landing-hero {
+        min-height: auto;
+        padding: 2rem 1rem;
+    }
+
+    .scroll-prompt {
+        display: none;
+    }
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+    .cta-button, .button, .theme-toggle, .logout-button {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .stories .story:hover {
+        transform: none;
+    }
+
+    button:active {
+        transform: scale(0.98);
     }
 }
