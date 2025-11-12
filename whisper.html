@@ -40,9 +40,9 @@
             window.location.href = 'index.html';
         }
 
-        // Check if user type is main
-        if (localStorage.getItem('echoverse_user_type') === 'decoy') {
-            window.location.href = 'whisper.html';
+        // Check if user type is decoy
+        if (localStorage.getItem('echoverse_user_type') !== 'decoy') {
+            window.location.href = 'echo.html';
         }
 
         import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
@@ -91,7 +91,7 @@
                     .insert([{ 
                         content, 
                         created_at: new Date(),
-                        channel: 'main'
+                        channel: 'decoy'
                     }]);
 
                 if (error) throw error;
@@ -113,7 +113,7 @@
                 const { data, error } = await supabaseClient
                     .from('echoes')
                     .select('*')
-                    .or('channel.eq.main,channel.is.null')
+                    .eq('channel', 'decoy')
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;

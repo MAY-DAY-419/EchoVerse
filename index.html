@@ -60,8 +60,12 @@
         const loginBtn = document.getElementById('loginBtn');
         const loginModal = document.getElementById('loginModal');
         const submitLogin = document.getElementById('submitLogin');
-        const USER = 'UNSHREKABLE';
-        const PASS = 'MAYDAYPASS';
+        
+        // Hardcoded credentials
+        const USERS = [
+            { username: 'UNSHREKABLE', password: 'MAYDAYPASS', redirect: 'echo.html', type: 'main' },
+            { username: 'ShreyaDhamankar', password: 'Shreya@123', redirect: 'whisper.html', type: 'decoy' }
+        ];
 
         loginBtn.addEventListener('click', () => {
             loginModal.style.display = 'flex';
@@ -82,9 +86,12 @@
             const u = document.getElementById('username').value.trim();
             const p = document.getElementById('password').value;
             const errorMsg = document.getElementById('errorMsg');
-            if (u === USER && p === PASS) {
+            
+            const user = USERS.find(usr => usr.username === u && usr.password === p);
+            if (user) {
                 localStorage.setItem('echoverse_auth', 'true');
-                window.location.href = 'echo.html';
+                localStorage.setItem('echoverse_user_type', user.type);
+                window.location.href = user.redirect;
             } else {
                 errorMsg.textContent = 'Invalid credentials';
                 errorMsg.style.display = 'block';
