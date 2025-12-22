@@ -50,8 +50,8 @@
     <!-- Secret Photo Modal -->
     <div id="secretPhotoModal" class="modal" aria-hidden="true">
         <div class="modal-content photo-modal" role="dialog" aria-modal="true" aria-labelledby="secretPhotoTitle">
-            <h2 id="secretPhotoTitle">Make sure nobody is watchin</h2>
-            <img id="secretPhoto" src="/assets/sample.png" alt="Secret" class="secret-photo" />
+            <h2 id="secretPhotoTitle">BEAUTY</h2>
+            <img id="secretPhoto" alt="Secret" class="secret-photo" />
         </div>
     </div>
 
@@ -124,9 +124,41 @@
             secretQuestionModal.setAttribute('aria-hidden', 'true');
         };
 
+        const SECRET_PHOTO_PATH = '/assets/sample.png';
+        const SECRET_PHOTO_HASH = '9CD09AACC99525D7ADBA78DFFE10BA131600D710E696497F5B99C931C07313FB'; // SHA-256 (HEX)
+
         const openSecretPhoto = () => {
             secretPhotoModal.style.display = 'flex';
             secretPhotoModal.setAttribute('aria-hidden', 'false');
+        };
+
+        const toHex = (buffer) => {
+            const bytes = new Uint8Array(buffer);
+            let hex = '';
+            for (let i = 0; i < bytes.length; i++) {
+                hex += bytes[i].toString(16).padStart(2, '0');
+            }
+            return hex.toUpperCase();
+        };
+
+        const verifyAndShowSecretPhoto = async () => {
+            try {
+                const resp = await fetch(SECRET_PHOTO_PATH, { cache: 'no-store' });
+                if (!resp.ok) throw new Error('Failed to fetch image');
+                const buf = await resp.arrayBuffer();
+                const digest = await crypto.subtle.digest('SHA-256', buf);
+                const hex = toHex(digest);
+                if (hex === SECRET_PHOTO_HASH) {
+                    const imgEl = document.getElementById('secretPhoto');
+                    imgEl.src = SECRET_PHOTO_PATH;
+                    openSecretPhoto();
+                } else {
+                    alert('Image failed integrity check.');
+                }
+            } catch (e) {
+                console.error('Integrity check error:', e);
+                alert('Could not verify image integrity.');
+            }
         };
 
         const closeSecretPhoto = () => {
@@ -141,7 +173,7 @@
             if (secretAllowed.includes(answer)) {
                 closeSecretQuestion();
                 alert('Make sure nobody is watchin');
-                openSecretPhoto();
+                verifyAndShowSecretPhoto();
             } else {
                 const message = wrongMessages[Math.min(wrongCount, wrongMessages.length - 1)];
                 secretError.textContent = message;
