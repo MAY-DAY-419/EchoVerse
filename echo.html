@@ -20,7 +20,9 @@
     <button class="logout-btn" id="logoutBtn">Logout</button>
 
     <div class="container" style="margin-top: 80px;">
-        <img src="/assets/echo.png" alt="EchoVerse Logo" style="width: 80px; height: 80px; margin: 0 auto 20px; display: block; border-radius: 15px;" />
+        <div class="logo-row" style="justify-content:center;">
+            <button class="cta-button secret-button" id="secretPhotoBtn">Wanna  play a game</button>
+        </div>
         <h1 class="page-title">EchoVerse</h1>
         
         <div class="composer">
@@ -32,6 +34,24 @@
 
         <div class="stories" id="echoStream">
             <p style="text-align: center; color: var(--current-muted);">Loading echoes...</p>
+        </div>
+    </div>
+
+    <!-- Secret Question Modal -->
+    <div id="secretQuestionModal" class="modal" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="secretQuestionTitle">
+            <h2 id="secretQuestionTitle">What does he loves to eat?</h2>
+            <input type="text" id="secretAnswer" placeholder="Type your answer" />
+            <button class="cta-button" id="secretSubmit">Reveal</button>
+            <p id="secretError" class="secret-error" aria-live="polite"></p>
+        </div>
+    </div>
+
+    <!-- Secret Photo Modal -->
+    <div id="secretPhotoModal" class="modal" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="secretPhotoTitle">
+            <h2 id="secretPhotoTitle">Make sure nobody is watchin</h2>
+            <img id="secretPhoto" src="/assets/sample.png" alt="Secret" class="secret-photo" />
         </div>
     </div>
 
@@ -69,6 +89,76 @@
             localStorage.removeItem('echoverse_auth');
             localStorage.removeItem('echoverse_user_type');
             window.location.href = 'index.html';
+        });
+
+        // Secret question flow (main only)
+        const secretBtn = document.getElementById('secretPhotoBtn');
+        const secretQuestionModal = document.getElementById('secretQuestionModal');
+        const secretPhotoModal = document.getElementById('secretPhotoModal');
+        const secretAnswerInput = document.getElementById('secretAnswer');
+        const secretSubmit = document.getElementById('secretSubmit');
+        const secretError = document.getElementById('secretError');
+        const secretAllowed = ['me','shreya'];
+        const wrongMessages = [
+            'Try Harder',
+            'Wuttt you dontt knowwww thisss😵‍💫😵‍💫',
+            'commmm onnnnnnn🥲 ',
+            'i get it , You dont love me 😢😢',
+            'Lastttt channnceee 😤😤',
+            'Game Over 😵‍💫😵‍💫 , It was Youuuuu'
+
+        ];
+        let wrongCount = 0;
+
+        const openSecretQuestion = () => {
+            wrongCount = 0;
+            secretError.textContent = '';
+            secretAnswerInput.value = '';
+            secretQuestionModal.style.display = 'flex';
+            secretQuestionModal.setAttribute('aria-hidden', 'false');
+            setTimeout(() => secretAnswerInput.focus(), 50);
+        };
+
+        const closeSecretQuestion = () => {
+            secretQuestionModal.style.display = 'none';
+            secretQuestionModal.setAttribute('aria-hidden', 'true');
+        };
+
+        const openSecretPhoto = () => {
+            secretPhotoModal.style.display = 'flex';
+            secretPhotoModal.setAttribute('aria-hidden', 'false');
+        };
+
+        const closeSecretPhoto = () => {
+            secretPhotoModal.style.display = 'none';
+            secretPhotoModal.setAttribute('aria-hidden', 'true');
+        };
+
+        secretBtn?.addEventListener('click', openSecretQuestion);
+
+        secretSubmit?.addEventListener('click', () => {
+            const answer = secretAnswerInput.value.trim().toLowerCase();
+            if (secretAllowed.includes(answer)) {
+                closeSecretQuestion();
+                alert('Make sure nobody is watchin');
+                openSecretPhoto();
+            } else {
+                const message = wrongMessages[Math.min(wrongCount, wrongMessages.length - 1)];
+                secretError.textContent = message;
+                wrongCount += 1;
+            }
+        });
+
+        secretAnswerInput?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') secretSubmit.click();
+        });
+
+        secretQuestionModal?.addEventListener('click', (e) => {
+            if (e.target === secretQuestionModal) closeSecretQuestion();
+        });
+
+        secretPhotoModal?.addEventListener('click', (e) => {
+            if (e.target === secretPhotoModal) closeSecretPhoto();
         });
 
         // Supabase

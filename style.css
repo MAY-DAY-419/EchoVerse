@@ -56,6 +56,33 @@ html,body{
     position: relative;
 }
 
+.logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.main-logo {
+    width: 200px;
+    height: 200px;
+    border-radius: 20px;
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.main-logo-small {
+    width: 80px;
+    height: 80px;
+}
+
+.secret-button {
+    padding: 0.85rem 1.4rem;
+    font-size: 0.95rem;
+    align-self: center;
+    white-space: nowrap;
+}
+
 .brand-title {
     font-size: clamp(3rem, 15vw, 8rem);
     font-weight: 800;
@@ -323,6 +350,22 @@ button {
     color: var(--current-text);
     font-size: 16px;
     font-family: inherit;
+}
+
+.secret-photo {
+    display: block;
+    width: 100%;
+    max-width: 340px;
+    border-radius: 16px;
+    margin: 0 auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.secret-error {
+    color: #ff6b6b;
+    min-height: 22px;
+    text-align: center;
+    margin: 8px 0 0;
 }
 
 .modal-content input:focus {
