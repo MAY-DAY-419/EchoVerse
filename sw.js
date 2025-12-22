@@ -1,16 +1,13 @@
-const CACHE_VERSION = 'echoverse-v2';
+const CACHE_VERSION = 'echoverse-v3';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const OFFLINE_URL = '/offline.html';
 
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/echo.html',
-  '/style.css',
   '/manifest.json',
-  '/assets/sample.svg',
-  OFFLINE_URL
+  OFFLINE_URL,
+  '/assets/echo.png',
+  '/assets/sample.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -47,7 +44,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for static assets
+  // Cache-first for a small set of static assets (icons, offline)
   if (STATIC_ASSETS.some((path) => url.pathname === path)) {
     event.respondWith(caches.match(req).then((c) => c || fetch(req)));
     return;
