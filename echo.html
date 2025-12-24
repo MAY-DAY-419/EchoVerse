@@ -20,9 +20,6 @@
     <button class="logout-btn" id="logoutBtn">Logout</button>
 
     <div class="container" style="margin-top: 80px;">
-        <div class="logo-row" style="justify-content:center;">
-            <button class="cta-button secret-button" id="secretPhotoBtn">Wanna  play a game</button>
-        </div>
         <h1 class="page-title">EchoVerse</h1>
         
         <div class="composer">
@@ -197,6 +194,14 @@
         const { createClient } = supabase;
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Device identity for reaction toggle
+        const DEVICE_ID_KEY = 'echoverse_device_id';
+        let DEVICE_ID = localStorage.getItem(DEVICE_ID_KEY);
+        if (!DEVICE_ID) {
+            DEVICE_ID = (self.crypto?.randomUUID?.() || Math.random().toString(36).slice(2));
+            localStorage.setItem(DEVICE_ID_KEY, DEVICE_ID);
+        }
+
         // Submit Echo
         const submitEcho = document.getElementById('submitEcho');
         const echoText = document.getElementById('echoText');
@@ -230,12 +235,21 @@
             }
         });
 
+        // Reactions config (WhatsApp-style long press)
+        const EMOJIS = ['❤️','😂','👍','😮','😢'];
+        let holdTimer = null;
+        let holdTarget = null;
+        let currentPopover = null;
+        let currentPopoverEchoId = null;
+        const reactionInFlight = new Set();
+        const debounceRefresh = new Map();
+
         // Load Echoes
         async function loadEchoes() {
             try {
                 const { data, error } = await supabaseClient
                     .from('echoes')
-                    .select('*')
+                    .select('id, content, created_at, channel')
                     .or('channel.eq.main,channel.is.null')
                     .order('created_at', { ascending: false });
 
@@ -250,21 +264,267 @@
 
                 echoStream.innerHTML = '';
 
-                data.forEach(echo => {
+                data.forEach((echo) => {
                     const date = new Date(echo.created_at);
                     const timeAgo = formatTime(date);
                     const card = document.createElement('div');
                     card.className = 'story fade-in';
+                    card.setAttribute('data-echo-id', echo.id);
                     card.innerHTML = `
                         <div class="meta">${timeAgo}</div>
                         <div class="content">${escapeHtml(echo.content)}</div>
                     `;
                     echoStream.appendChild(card);
+                        // Load and render chips if reactions exist
+                        getReactionCounts(echo.id)
+                            .then(counts => renderReactionChips(card, counts))
+                            .catch(() => {});
                 });
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('echoStream').innerHTML = '<p style="text-align: center; color: #ff6b6b;">Failed to load echoes</p>';
             }
+        }
+        
+        async function getReactionCounts(echoId) {
+            const { data, error } = await supabaseClient
+                .from('echo_reactions')
+                .select('emoji')
+                .eq('echo_id', echoId);
+            if (error) throw error;
+            const counts = {};
+            for (const emoji of EMOJIS) counts[emoji] = 0;
+            data.forEach(row => { if (counts[row.emoji] !== undefined) counts[row.emoji] += 1; });
+            return counts;
+        }
+        
+            function renderReactionChips(cardEl, counts) {
+                const total = Object.values(counts).reduce((a,b)=>a+(b||0),0);
+                let chips = cardEl.querySelector('.reaction-chips');
+                if (total === 0) {
+                    if (chips) chips.remove();
+                    return;
+                }
+                if (!chips) {
+                    chips = document.createElement('div');
+                    chips.className = 'reaction-chips';
+                    cardEl.appendChild(chips);
+                }
+                const entries = Object.entries(counts).filter(([,c]) => c>0);
+                entries.sort((a,b)=>b[1]-a[1]);
+                chips.innerHTML = entries.map(([emoji,c]) => `
+                    <span class="reaction-chip" data-emoji="${emoji}">
+                        <span class="emoji">${emoji}</span>
+                        <span class="cnt">${c}</span>
+                    </span>
+                `).join('');
+            }
+
+        async function addReaction(echoId, emoji, btnEl) {
+            try {
+                if (reactionInFlight.has(echoId)) return; // guard duplicate rapid taps
+                reactionInFlight.add(echoId);
+                if (btnEl) btnEl.disabled = true;
+
+                // Toggle: if this exact emoji exists for my device, remove it; else add
+                const { data: mine, error: findErr } = await supabaseClient
+                    .from('echo_reactions')
+                    .select('id')
+                    .eq('echo_id', echoId)
+                    .eq('emoji', emoji)
+                    .eq('device_id', DEVICE_ID)
+                    .limit(1);
+                if (findErr) throw findErr;
+
+                if (mine && mine.length) {
+                    // Remove this reaction
+                    const { error: delErr } = await supabaseClient
+                        .from('echo_reactions')
+                        .delete()
+                        .eq('id', mine[0].id);
+                    if (delErr) throw delErr;
+                } else {
+                    // Add new reaction
+                    const { error: insErr } = await supabaseClient
+                        .from('echo_reactions')
+                        .insert([{ echo_id: echoId, emoji, device_id: DEVICE_ID, created_at: new Date() }]);
+                    if (insErr) throw insErr;
+                }
+
+                // Re-fetch authoritative counts and render chips
+                const card = document.querySelector(`[data-echo-id="${echoId}"]`);
+                if (card) {
+                    try {
+                        const counts = await getReactionCounts(echoId);
+                        renderReactionChips(card, counts);
+                    } catch {}
+                }
+            } catch (e) {
+                console.error('Add reaction failed:', e);
+                alert('Unable to add reaction.');
+            } finally {
+                if (btnEl) btnEl.disabled = false;
+                reactionInFlight.delete(echoId);
+            }
+        }
+        
+        // Long-press / right-click to open reactions popover
+        const streamEl = document.getElementById('echoStream');
+
+        function startHold(targetEl, clientX, clientY) {
+            clearHold();
+            holdTarget = targetEl.closest('[data-echo-id]');
+            if (!holdTarget) return;
+            holdTimer = setTimeout(() => {
+                const echoId = holdTarget.getAttribute('data-echo-id');
+                openReactionPopover(echoId, clientX, clientY);
+            }, 350);
+        }
+
+        function clearHold() {
+            if (holdTimer) {
+                clearTimeout(holdTimer);
+                holdTimer = null;
+            }
+            holdTarget = null;
+        }
+
+        streamEl.addEventListener('mousedown', (e) => {
+            if (!(e.target instanceof Element)) return;
+            startHold(e.target, e.clientX, e.clientY);
+        });
+        streamEl.addEventListener('mouseup', clearHold);
+        streamEl.addEventListener('mouseleave', clearHold);
+
+        streamEl.addEventListener('touchstart', (e) => {
+            const t = e.touches[0];
+            const target = document.elementFromPoint(t.clientX, t.clientY) || e.target;
+            startHold(target, t.clientX, t.clientY);
+        }, { passive: true });
+        streamEl.addEventListener('touchend', clearHold, { passive: true });
+        streamEl.addEventListener('touchcancel', clearHold, { passive: true });
+
+        streamEl.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (!(e.target instanceof Element)) return;
+            const card = e.target.closest('[data-echo-id]');
+            if (!card) return;
+            openReactionPopover(card.getAttribute('data-echo-id'), e.clientX, e.clientY);
+        });
+
+        function ensurePopover() {
+            if (currentPopover) return currentPopover;
+            const pop = document.createElement('div');
+            pop.className = 'reaction-popover';
+            pop.innerHTML = `
+                <div class="reaction-row">
+                    ${EMOJIS.map(e => `<button class=\"reaction-option\" data-emoji=\"${e}\" aria-label=\"React ${e}\">${e}</button>`).join('')}
+                    <button class="reaction-option keyboard" data-keyboard="true" aria-label="More">⌨️</button>
+                </div>
+                <input class="reaction-input" type="text" placeholder="Pick emoji…" aria-label="Emoji input" />
+            `;
+            document.body.appendChild(pop);
+
+            // Click handlers
+            pop.addEventListener('click', async (ev) => {
+                const btn = ev.target.closest('.reaction-option');
+                if (!btn) return;
+                if (btn.hasAttribute('data-keyboard')) {
+                    const input = pop.querySelector('.reaction-input');
+                    input.focus();
+                    return;
+                }
+                const emoji = btn.getAttribute('data-emoji');
+                if (!emoji || !currentPopoverEchoId) return;
+                await addReaction(currentPopoverEchoId, emoji, btn);
+                closeReactionPopover();
+            });
+
+            const input = pop.querySelector('.reaction-input');
+            input.addEventListener('input', async () => {
+                const val = input.value.trim();
+                if (!val) return;
+                const first = Array.from(val)[0];
+                if (!first) return;
+                if (currentPopoverEchoId) await addReaction(currentPopoverEchoId, first, input);
+                input.value = '';
+                closeReactionPopover();
+            });
+
+            // Dismiss on outside click
+            document.addEventListener('click', (evt) => {
+                if (!currentPopover) return;
+                if (evt.target instanceof Element && !currentPopover.contains(evt.target)) {
+                    closeReactionPopover();
+                }
+            });
+            window.addEventListener('scroll', closeReactionPopover, { passive: true });
+
+            currentPopover = pop;
+            return pop;
+        }
+
+        async function openReactionPopover(echoId, clientX, clientY) {
+            const pop = ensurePopover();
+            currentPopoverEchoId = echoId;
+            // Position
+            const pad = 8;
+            const { innerWidth: vw, innerHeight: vh } = window;
+            pop.style.visibility = 'hidden';
+            pop.style.display = 'block';
+            // temp to compute size
+            const width = pop.offsetWidth || 220;
+            const height = pop.offsetHeight || 56;
+            let left = Math.max(pad, Math.min(vw - width - pad, clientX - width / 2));
+            let top = Math.max(pad, Math.min(vh - height - pad, clientY - height - 12));
+            pop.style.left = left + 'px';
+            pop.style.top = top + 'px';
+            pop.style.visibility = 'visible';
+
+            // Load counts into title tooltips (optional)
+            try {
+                const counts = await getReactionCounts(echoId);
+                EMOJIS.forEach(e => {
+                    const b = pop.querySelector(`.reaction-option[data-emoji="${e}"]`);
+                    if (b) b.title = `${counts[e] || 0}`;
+                });
+            } catch {}
+        }
+
+        function closeReactionPopover() {
+            if (!currentPopover) return;
+            currentPopover.style.display = 'none';
+            currentPopoverEchoId = null;
+        }
+
+        // Supabase Realtime: refresh chips on inserts/deletes
+        try {
+            const channel = supabaseClient.channel('echo_reactions_live');
+            const schedule = (echoId) => {
+                if (!echoId) return;
+                const existing = debounceRefresh.get(echoId);
+                if (existing) clearTimeout(existing);
+                const t = setTimeout(async () => {
+                    debounceRefresh.delete(echoId);
+                    const card = document.querySelector(`[data-echo-id="${echoId}"]`);
+                    if (!card) return;
+                    try {
+                        const counts = await getReactionCounts(echoId);
+                        renderReactionChips(card, counts);
+                    } catch {}
+                }, 250);
+                debounceRefresh.set(echoId, t);
+            };
+
+            channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'echo_reactions' }, (payload) => {
+                schedule(payload?.new?.echo_id);
+            });
+            channel.on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'echo_reactions' }, (payload) => {
+                schedule(payload?.old?.echo_id);
+            });
+            channel.subscribe();
+        } catch (e) {
+            console.debug('Realtime setup skipped/unavailable', e);
         }
 
         function formatTime(date) {
